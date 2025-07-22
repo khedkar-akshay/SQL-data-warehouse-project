@@ -1,110 +1,62 @@
-CREATE OR ALTER PROCEDURE bronze.load_bronze as 
-BEGIN
+IF OBJECT_ID('bronze.crm_cust_info','U') IS NOT NULL 
+	DROP TABLE bronze.crm_cust_info
+CREATE TABLE bronze.crm_cust_info(
+cst_id INT,
+cst_key NVARCHAR(50),
+cst_firstname NVARCHAR(50),
+cst_lastname NVARCHAR(50),
+cst_material_status NVARCHAR(50),
+cst_gndr NVARCHAR(50),
+cst_create_date DATE
+);
 
-	DECLARE @start_time DATETIME, @end_time DATETIME,@batch_start_time DATETIME,@batch_end_time DATETIME;
-	print'==================================================================';
-	print'Loading the Bronze Layer';
-	print'==================================================================';
-	
-	
-	print'------------------------------------------------------------------';
-	print'Loading CRM Table';
-	print'------------------------------------------------------------------';
+IF OBJECT_ID('bronze.crm_prd_info','U') IS NOT NULL 
+	DROP TABLE bronze.crm_prd_info
+CREATE TABLE bronze.crm_prd_info(
+	prd_id INT,
+	prd_key NVARCHAR(50),
+	prd_nm NVARCHAR(50),
+	prd_cost INT,
+	prd_line NVARCHAR(50),
+	prd_start_dt DATE,
+	prd_end_dt DATE
+)
 
+IF OBJECT_ID('bronze.crm_sales_details','U') IS NOT NULL 
+	DROP TABLE bronze.crm_sales_details
+CREATE TABLE bronze.crm_sales_details(
+	sls_ord_num NVARCHAR(50),
+	sls_prd_key NVARCHAR(50),
+	sls_cust_id INT,
+	sls_order_dt INT,
+	sls_ship_dt INT,
+	sls_due_dt INT,
+	sls_sales INT,
+	sls_quantity INT,
+	sls_price INT
+);
 
-	SET @start_time=GETDATE();
-	print'Truncating the table : crm_cust_info'
-	TRUNCATE TABLE bronze.crm_cust_info;
-	print'Inserting the table into :crm_cust_info'
-	BULK INSERT bronze.crm_cust_info
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_crm\cust_info.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
-
-
-	SET @start_time=GETDATE();
-	print'Truncating the table :crm_prd_info'
-	TRUNCATE TABLE bronze.crm_prd_info;
-	print'Inserting the table into: crm_prd_info'
-	BULK INSERT bronze.crm_prd_info
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_crm\prd_info.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
-
-
-	SET @start_time=GETDATE();
-	print'Truncating the table: crm_sales_details'
-	TRUNCATE TABLE bronze.crm_sales_details;
-	print'Inserting the data into : crm_sales_details'
-	BULK INSERT bronze.crm_sales_details
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_crm\sales_details.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
-
-	print'------------------------------------------------------------------';
-	print'Loading ERP Table';
-	print'------------------------------------------------------------------';
+IF OBJECT_ID('bronze.erp_loc_a101','U') IS NOT NULL 
+	DROP TABLE bronze.erp_loc_a101
+CREATE TABLE bronze.erp_loc_a101(
+	cid NVARCHAR(50),
+	cntry NVARCHAR(50)
+);
 
 
-	SET @start_time=GETDATE();
-	PRINT'Truncating the table : erp_cust_az12'
-	TRUNCATE TABLE bronze.erp_cust_az12;
-	Print'Inserting Data into: erp_cust_az12'
-	BULK INSERT bronze.erp_cust_az12
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_erp\CUST_AZ12.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
+IF OBJECT_ID('bronze.erp_cust_az12','U') IS NOT NULL 
+	DROP TABLE bronze.erp_cust_az12
+CREATE TABLE bronze.erp_cust_az12(
+	cid NVARCHAR(50),
+	bdate DATE,
+	gen NVARCHAR(50)
+);
 
-
-	SET @start_time=GETDATE();
-	print'Truncating the table : erp_loc_a101'
-	TRUNCATE TABLE bronze.erp_loc_a101;
-	print'Inserting the data into:erp_loc_a101'
-	BULK INSERT bronze.erp_loc_a101
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_erp\loc_a101.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
-
-
-	SET @start_time=GETDATE();
-	print'Truncating the table : erp_px_cat_g1v2'
-	TRUNCATE TABLE bronze.erp_px_cat_g1v2;
-	print'Inserting the data into : erp_px_cat_g1v2'
-	BULK INSERT bronze.erp_px_cat_g1v2
-	from 'C:\Users\aksha\Desktop\SQL\sql-data-warehouse-project\datasets\source_erp\px_cat_g1v2.csv'
-	WITH(
-		FIRSTROW = 2,
-		FIELDTERMINATOR = ',',
-		TABLOCK
-	);
-	SET @end_time=GETDATE();
-	PRINT'Load Duration : ' + cast(datediff(second,@start_time,@end_time) as nvarchar) +'seconds';
-END
-
-exec bronze.load_bronze
+IF OBJECT_ID('bronze.erp_px_cat_g1v2','U') IS NOT NULL 
+	DROP TABLE bronze.erp_px_cat_g1v2
+CREATE TABLE bronze.erp_px_cat_g1v2(
+	id			NVARCHAR(50),
+	cat			NVARCHAR(50),
+	subcat		NVARCHAR(50),
+	maintenance NVARCHAR(50)
+);
